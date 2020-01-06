@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        h1{
+            font-size: 30px;
+        }
+        table{
+            margin:auto;
+        }
+        td{
+            border:1px solid rgb(88, 44, 7);
+            width:110px;
+            height:110px;
+            border-radius:20%;
+        }
+        .red{
+            /* background:crimson; */
+            background-image: url(./rat.jpg);
+            background-size: contain;
+            position:relative;
+            animation-name:move;
+            animation: duration 5s;
+            animation-iteration-count:infinite;
+            animation-direction:alternate;
+            animation-fill-mode:forwards;
+
+        }
+        .blue{
+            /* background:darkblue; */
+            background-image: url(./blood.png);
+        }
+    body{
+            margin:auto;
+            padding:10px;
+            position:relative;top:50px;
+            text-align:center;
+            color:rgb(133, 18, 7);
+            font-weight:bolder;
+            /* url(圖檔路徑) X位置y位置,預設樣式 */
+            cursor:url(./crosshair.png)50 50,auto;       
+        
+    }
+
+       
+    </style>
+
+</head>
+<body>
+    <h1>打地鼠遊戲</h1>
+    <table>
+        <tr>           
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    </table><br>
+   <input type="button" value="開始遊戲" id="startBtn"><br><br>
+    目前高分 <span id="scoreText">0</span><br>
+    最高分數 <span id="highNameText">沒有人</span>的分數是 <span id="highScoreText">0</span><br>
+    <script>
+        let score= 0;
+        let scoreText = document.getElementById("scoreText");
+        let startBtn = document.getElementById("startBtn");
+        let tds = document.getElementsByTagName("td");
+
+        //設定計時器的變數為0、避免被clearInterval清掉，才可以重複利用
+        let gameTimer = 0; 
+
+        let high = {name:"",score:0};
+        let highNameText = document.getElementById("highNameText");
+        let highScoreText = document.getElementById("highScoreText");
+
+        let highStorage = window.localStorage.getItem("highscore");//application.local storage->file 暫存在這裡
+        //getItem() 作为 Storage 接口的方法，接受一个键名（key name）作为参数，并返回对应键名的值（key's value）。
+        if(highStorage != null){//未設定
+            high = JSON.parse(highStorage);
+            highNameText.innerText = high.name;
+            highScoreText.innerText = high.score;
+        }
+        startBtn.onclick = () =>{
+            //將開始按鈕停用
+            startBtn.setAttribute("disabled",true);//避免案開始時重復按導致亂掉
+            // disabled 属性规定应该禁用 input 元素。
+            //分數歸零
+            score = 0;
+            scoreText.innerText = score; 
+            // setAttribute() 方法添加指定的属性，要获取某个属性当前的值，可使用 getAttribute()；要删除某个属性，可使用 removeAttribute()。
+
+            game();//先跑一次
+            gameTimer = setInterval(game, 1000);
+            setTimeout(
+                ()=>{
+                clearInterval(gameTimer);
+                for(let td of tds){
+                    td.classList.remove("red");//classList 是替代element.className作为空格分隔的字符串访问元素的类列表的一种方便的方法。
+                    td.classList.remove("blue");
+                }
+                alert(`時間到，你得到${score}分!`);
+                startBtn.removeAttribute("disabled");
+                
+                if(score>high.score){
+                    let playerName = prompt("恭喜你得到最高分，請輸入你的名子");
+                    high.name=playerName;
+                    highNameText.innerText=playerName;
+                    high.score=score;
+                    highScoreText.innerText=score;
+                    //window.localStorage.setIem只能存文字
+                    //JSON.stringify 可以將JSON陣列轉文字
+                    window.localStorage.setItem("highscore",JSON.stringify(high));
+                }
+            },3000);
+        } 
+        //forEach()->[1,2,3]簡單的陣列
+        let game = () =>{
+            for(let td of tds){
+                td.classList.remove("red");
+                td.classList.remove("blue");//每次清除藍色和紅色
+            }
+            for(let i=0;i<3;i++){
+                let rand = Math.round(Math.random()*8);
+                tds[rand].classList.add("red");
+            }//每次選取3格
+        }
+        for(let td of tds){
+            td.onclick = () =>{
+                if(td.classList.contains("red")){
+                    td.classList.remove("red");
+                    td.classList.add("blue");
+                    score++;
+                    scoreText.innerText=score;
+                }//按格子後的反應
+            }
+        }
+     </script>
+</body>
+</html>
